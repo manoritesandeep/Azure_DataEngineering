@@ -1,0 +1,80 @@
+// CETAS Task 6
+
+
+// Sample
+IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') 
+    CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] 
+    WITH ( FORMAT_TYPE = DELIMITEDTEXT ,
+           FORMAT_OPTIONS (
+             FIELD_TERMINATOR = ',',
+             USE_TYPE_DEFAULT = FALSE
+            ))
+GO;
+
+IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'payment_dfs_core_windows_net') 
+    CREATE EXTERNAL DATA SOURCE [payment_dfs_core_windows_net] 
+    WITH (
+        LOCATION = 'https://proj02blobstorage.blob.core.windows.net/udemyproj02-try3/publicpayment.csv' 
+    )
+GO;
+
+CREATE EXTERNAL TABLE dbo.fact_payment
+WITH (
+    LOCATION     = 'fact_payment',
+    DATA_SOURCE = [payment_dfs_core_windows_net],
+    FILE_FORMAT = [SynapseDelimitedTextFormat]
+)  
+AS
+SELECT [payment_id], [amount], [date]
+FROM [dbo].[staging_payment];
+GO;
+SELECT TOP 100 * FROM dbo.fact_payment;
+----------------------------------------------------------------------------------------------
+
+// fact_payment table "star schema"
+
+IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') 
+    CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] 
+    WITH ( FORMAT_TYPE = DELIMITEDTEXT ,
+           FORMAT_OPTIONS (
+             FIELD_TERMINATOR = ',',
+             USE_TYPE_DEFAULT = FALSE
+            ))
+GO;
+
+IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'payment_dfs_core_windows_net') 
+    CREATE EXTERNAL DATA SOURCE [payment_dfs_core_windows_net] 
+    WITH (
+        LOCATION = 'https://proj02blobstorage.blob.core.windows.net/udemyproj02-try3/publicpayment/demo2_enterlocationhere' 
+    )
+GO;
+
+
+IF OBJECT_ID('dbo.fact_payment') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.fact_payment
+END;
+
+CREATE EXTERNAL TABLE dbo.fact_payment
+WITH (
+    LOCATION     = 'fact_payment',
+    DATA_SOURCE = [payment_dfs_core_windows_net],
+    FILE_FORMAT = [SynapseDelimitedTextFormat]
+)  
+AS
+    SELECT 
+        cast(convert(varchar(8),p.date,'yyyymmdd') as int) as date_key
+        -- CAST(p.date AS DATE) as date_key
+        , r.rider_id as rider_key
+        , s.station_id as station_key
+        , t.trip_id as trip_key
+    FROM [dbo].[staging_payment] p
+    INNER JOIN [dbo].[staging_rider] r ON p.rider_id = r.rider_id
+    INNER JOIN [dbo].[staging_trip] t    ON t.rider_id = r.rider_id
+    INNER JOIN [dbo].[staging_station] s ON s.station_id = t.start_station_id    
+    ;
+
+GO;
+
+
+SELECT TOP 100 * FROM dbo.fact_payment;

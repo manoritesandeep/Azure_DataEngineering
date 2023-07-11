@@ -1,0 +1,40 @@
+-- dimStation for star schema
+
+IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') 
+    CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] 
+    WITH ( FORMAT_TYPE = DELIMITEDTEXT ,
+           FORMAT_OPTIONS (
+             FIELD_TERMINATOR = ',',
+             USE_TYPE_DEFAULT = FALSE
+            ))
+GO;
+
+IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'station_dfs_core_windows_net') 
+    CREATE EXTERNAL DATA SOURCE [station_dfs_core_windows_net] 
+    WITH (
+        LOCATION = 'https://proj02blobstorage.blob.core.windows.net/udemyproj02-try3/publicstation.csv' 
+    )
+GO;
+
+IF OBJECT_ID('dbo.dimStation') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.dimStation
+END;
+
+CREATE EXTERNAL TABLE dbo.dimStation
+WITH (
+    LOCATION     = 'dimStation',
+    DATA_SOURCE = [station_dfs_core_windows_net],
+    FILE_FORMAT = [SynapseDelimitedTextFormat]
+)  
+AS
+    SELECT 
+		s.station_id as station_key,
+		s.station_id,
+		s.name,
+		s.latitude,
+		s.longitude
+    FROM [dbo].[staging_station] s;
+GO;
+
+SELECT TOP 100 * FROM dbo.dimStation;

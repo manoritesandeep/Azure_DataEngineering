@@ -1,0 +1,5 @@
+/*
+    Analyze how much money is spent
+        Per month, quarter, year
+        Per member, based on the age of the rider at account start
+*/

@@ -1,0 +1,47 @@
+-- dimRiders for star schema
+
+
+IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') 
+    CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] 
+    WITH ( FORMAT_TYPE = DELIMITEDTEXT ,
+           FORMAT_OPTIONS (
+             FIELD_TERMINATOR = ',',
+             USE_TYPE_DEFAULT = FALSE
+            ))
+GO;
+
+IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'riders_dfs_core_windows_net') 
+    CREATE EXTERNAL DATA SOURCE [riders_dfs_core_windows_net] 
+    WITH (
+        LOCATION = 'https://proj02blobacc.blob.core.windows.net/proj02-imports/publicrider' 
+    )
+GO;
+
+/*
+IF OBJECT_ID('dbo.dimRiders') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.dimRiders
+END;
+*/
+
+CREATE EXTERNAL TABLE dbo.dimRiders
+WITH (
+    LOCATION     = 'dimRiders',
+    DATA_SOURCE = [riders_dfs_core_windows_net],
+    FILE_FORMAT = [SynapseDelimitedTextFormat]
+)  
+AS
+    SELECT 
+		r.rider_id as rider_key,
+		r.rider_id,
+		r.first,
+		r.last,
+		r.address,
+		r.birthday,
+		r.account_start_date,
+		r.account_end_date, 
+		r.is_member
+    FROM [dbo].[staging_rider] r;
+GO;
+
+SELECT TOP 100 * FROM dbo.dimRiders;

@@ -1,0 +1,6 @@
+DROP TABLE NYC_Payroll_EMP_MD;
+DROP TABLE NYC_Payroll_AGENCY_MD;
+DROP TABLE NYC_Payroll_Data;
+DROP TABLE NYC_Payroll_TITLE_MD;
+
+DROP TABLE [dbo].[NYC_Payroll_Summary];

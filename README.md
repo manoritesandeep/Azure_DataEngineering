@@ -27,4 +27,6 @@ Section 04: Data Pipelines with Azure
   - Introduction to Data Pipelines
   - Azure Data Pipeline Components
   - Transforming Data in Azure Data Pipelines
-  - 
+  - Azure Pipeline Data Quality
+  - Azure Data Pipelines in Production
+  - Data Integration Pipelines for NYC Data Payroll Data Analytics

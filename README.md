@@ -24,6 +24,7 @@ Section 03: Data lakes and lakehouses with Spark and Azure Databricks
   - Building an Azure Data Lake for Bike Share Data Analytics-Divvy
 
 Section 04: Data Pipelines with Azure
-  - ..
-  - ..
-  - ..
+  - Introduction to Data Pipelines
+  - Azure Data Pipeline Components
+  - Transforming Data in Azure Data Pipelines
+  - 
